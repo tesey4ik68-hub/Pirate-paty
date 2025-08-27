@@ -126,6 +126,12 @@
     .view-btn:hover {
       background: #228b22;
     }
+    .share-btn {
+      background: #4169e1;
+    }
+    .share-btn:hover {
+      background: #6495ed;
+    }
     .table-group {
       margin-top: 20px;
       border: 1px solid #b8860b;
@@ -225,6 +231,30 @@
       }
     }
 
+    // Генерация номера пропуска
+    function generatePassNumber(name, gender, table, seat) {
+      const fullName = name.toLowerCase();
+      
+      // Проверяем, является ли гость королевским
+      if (fullName.includes('панаморенко')) {
+        // Король - "1", Королева "2"
+        return gender === 'male' ? '1' : '2';
+      } 
+      else if (fullName.includes('вешкина') && gender === 'female') {
+        // Принцесса - "3"
+        return '3';
+      }
+      else if (fullName.includes('бурец') && gender === 'male') {
+        // Принц - "4"
+        return '4';
+      }
+      else {
+        // Для обычных гостей: №стола + номер места + " - " + первая буква имени (заглавная всегда)
+        const firstLetter = name.charAt(0).toUpperCase();
+        return `${table}${seat} - ${firstLetter}`;
+      }
+    }
+
     // Сохранение пропуска
     function savePass(name, gender, table, seat) {
       initPassStorage();
@@ -233,11 +263,15 @@
       // Проверяем, существует ли уже пропуск с таким именем
       const existingIndex = passes.findIndex(pass => pass.name === name);
       
+      // Генерируем номер пропуска
+      const passNumber = generatePassNumber(name, gender, table, seat);
+      
       const pass = {
         name: name,
         gender: gender,
         table: table,
         seat: seat,
+        passNumber: passNumber,
         timestamp: new Date().toISOString()
       };
       
@@ -262,6 +296,54 @@
       }
     }
 
+    // Функция поделиться
+    function sharePass(name, gender, table, seat, passNumber) {
+      const ticketUrl = window.location.href.replace('index.html', '') + 
+        `ticket.html?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
+      
+      // Определяем тип гостя для персонализации сообщения
+      const fullName = name.toLowerCase();
+      let shareText;
+      
+      if (fullName.includes('панаморенко')) {
+        shareText = `👑 Добро пожаловать на борт, Ваше Величество ${name.split(' ')[0]}!\n\nВот ваш королевский пиратский пропуск №${passNumber}:\n${ticketUrl}\n\n⚜️ Ждём вас 19 сентября!`;
+      } else if (fullName.includes('вешкина') && gender === 'female') {
+        shareText = `👸 Добро пожаловать на борт, юная принцесса ${name.split(' ')[0]}!\n\nВот ваш принцессин пиратский пропуск №${passNumber}:\n${ticketUrl}\n\n🎀 Ждём вас 19 сентября!`;
+      } else if (fullName.includes('бурец') && gender === 'male') {
+        shareText = `🤴 Добро пожаловать на борт, юный принц ${name.split(' ')[0]}!\n\nВот ваш принцеский пиратский пропуск №${passNumber}:\n${ticketUrl}\n\n🛡️ Ждём вас 19 сентября!`;
+      } else {
+        shareText = `🏴‍☠️ Добро пожаловать на борт, ${name.split(' ')[0]}!\n\nВот ваш персональный пиратский пропуск №${passNumber}:\n${ticketUrl}\n\n⚓ Ждём вас 19 сентября!`;
+      }
+      
+      // Проверяем поддержку Web Share API
+      if (navigator.share) {
+        navigator.share({
+          title: fullName.includes('панаморенко') ? 'Королевский пиратский пропуск' : 
+                 fullName.includes('вешкина') && gender === 'female' ? 'Принцессин пиратский пропуск' : 
+                 fullName.includes('бурец') && gender === 'male' ? 'Принцеский пиратский пропуск' :
+                 'Пиратский пропуск',
+          text: shareText,
+          url: ticketUrl
+        }).catch(error => {
+          console.log('Ошибка при попытке поделиться:', error);
+          copyToClipboard(shareText);
+        });
+      } else {
+        copyToClipboard(shareText);
+      }
+    }
+
+    // Копирование текста в буфер обмена
+    function copyToClipboard(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      alert("Ссылка и текст скопированы в буфер обмена!");
+    }
+
     // Загрузка и отображение списка пропусков
     function loadPasses() {
       initPassStorage();
@@ -273,18 +355,37 @@
         return;
       }
       
-      container.innerHTML = passes.map(pass => `
-        <div class="pass-item">
-          <div class="pass-info">
-            <strong>${pass.name}</strong> (${pass.gender === 'male' ? 'М' : 'Ж'})<br>
-            Стол: ${pass.table}, Место: ${pass.seat}
+      container.innerHTML = passes.map(pass => {
+        // Определяем тип гостя
+        const fullName = pass.name.toLowerCase();
+        let royalSymbol = '';
+        let guestType = '';
+        
+        if (fullName.includes('панаморенко')) {
+          royalSymbol = pass.gender === 'male' ? '👑' : '👑';
+          guestType = ' (Королевский)';
+        } else if (fullName.includes('вешкина') && pass.gender === 'female') {
+          royalSymbol = '👸';
+          guestType = ' (Принцесса)';
+        } else if (fullName.includes('бурец') && pass.gender === 'male') {
+          royalSymbol = '🤴';
+          guestType = ' (Принц)';
+        }
+        
+        return `
+          <div class="pass-item">
+            <div class="pass-info">
+              <strong>${royalSymbol} ${pass.name}</strong> ${guestType} (${pass.gender === 'male' ? 'М' : 'Ж'})<br>
+              Стол: ${pass.table}, Место: ${pass.seat}, №: ${pass.passNumber}
+            </div>
+            <div class="pass-actions">
+              <button class="view-btn" onclick="viewPass('${pass.name}', '${pass.gender}', '${pass.table}', '${pass.seat}', '${pass.passNumber}')">Открыть</button>
+              <button class="share-btn" onclick="sharePass('${pass.name}', '${pass.gender}', '${pass.table}', '${pass.seat}', '${pass.passNumber}')">Поделиться</button>
+              <button class="delete-btn" onclick="deletePass('${pass.name}')">Удалить</button>
+            </div>
           </div>
-          <div class="pass-actions">
-            <button class="view-btn" onclick="viewPass('${pass.name}', '${pass.gender}', '${pass.table}', '${pass.seat}')">Открыть</button>
-            <button class="delete-btn" onclick="deletePass('${pass.name}')">Удалить</button>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     // Группировка по столам
@@ -313,22 +414,41 @@
       container.innerHTML = sortedTables.map(table => `
         <div class="table-group">
           <div class="table-header">Стол №${table}</div>
-          ${tables[table].map(pass => `
-            <div class="table-pass-item">
-              <strong>${pass.name}</strong> (${pass.gender === 'male' ? 'М' : 'Ж'}) - Место: ${pass.seat}
-              <div style="float: right;">
-                <button class="view-btn" onclick="viewPass('${pass.name}', '${pass.gender}', '${pass.table}', '${pass.seat}')" style="padding: 2px 5px; font-size: 0.8em;">Открыть</button>
-                <button class="delete-btn" onclick="deletePass('${pass.name}')" style="padding: 2px 5px; font-size: 0.8em;">Удалить</button>
+          ${tables[table].map(pass => {
+            // Определяем тип гостя
+            const fullName = pass.name.toLowerCase();
+            let royalSymbol = '';
+            let guestType = '';
+            
+            if (fullName.includes('панаморенко')) {
+              royalSymbol = pass.gender === 'male' ? '👑' : '👑';
+              guestType = ' (Королевский)';
+            } else if (fullName.includes('вешкина') && pass.gender === 'female') {
+              royalSymbol = '👸';
+              guestType = ' (Принцесса)';
+            } else if (fullName.includes('бурец') && pass.gender === 'male') {
+              royalSymbol = '🤴';
+              guestType = ' (Принц)';
+            }
+            
+            return `
+              <div class="table-pass-item">
+                <strong>${royalSymbol} ${pass.name}</strong> ${guestType} (${pass.gender === 'male' ? 'М' : 'Ж'}) - Место: ${pass.seat}, №: ${pass.passNumber}
+                <div style="float: right;">
+                  <button class="view-btn" onclick="viewPass('${pass.name}', '${pass.gender}', '${pass.table}', '${pass.seat}', '${pass.passNumber}')" style="padding: 2px 5px; font-size: 0.8em;">Открыть</button>
+                  <button class="share-btn" onclick="sharePass('${pass.name}', '${pass.gender}', '${pass.table}', '${pass.seat}', '${pass.passNumber}')" style="padding: 2px 5px; font-size: 0.8em;">Поделиться</button>
+                  <button class="delete-btn" onclick="deletePass('${pass.name}')" style="padding: 2px 5px; font-size: 0.8em;">Удалить</button>
+                </div>
               </div>
-            </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
       `).join('');
     }
 
     // Открытие пропуска
-    function viewPass(name, gender, table, seat) {
-      const ticketUrl = `ticket.html?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}`;
+    function viewPass(name, gender, table, seat, passNumber) {
+      const ticketUrl = `ticket.html?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
       window.open(ticketUrl, '_blank');
     }
 
@@ -349,11 +469,14 @@
           return;
         }
 
+        // Генерируем номер пропуска
+        const passNumber = generatePassNumber(name, gender, table, seat);
+        
         // Сохраняем пропуск
         savePass(name, gender, table, seat);
 
         // 🔗 Используем относительный путь к ticket.html
-        const ticketUrl = `ticket.html?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}`;
+        const ticketUrl = `ticket.html?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
         console.log("Сформированный URL:", ticketUrl);
 
         document.getElementById("result-name").textContent = name;
