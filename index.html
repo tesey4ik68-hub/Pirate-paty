@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Генератор пиратских билетов</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode.js/lib/qrcode.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: url('https://i.imgur.com/3KZJ9lX.jpg') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Arial', sans-serif;
+      color: #f5d76e;
+    }
+    .overlay {
+      background: rgba(0, 0, 0, 0.8);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: rgba(0, 0, 0, 0.7);
+      border: 3px solid #b8860b;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 0 20px #b8860b;
+    }
+    h1 {
+      font-family: 'MedievalSharp', cursive;
+      text-align: center;
+      color: #d4af37;
+      font-size: 2.2em;
+      text-shadow: 2px 2px 5px #000;
+    }
+    label {
+      display: block;
+      margin: 15px 0 5px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #b8860b;
+      background: #111;
+      color: #fff;
+      border-radius: 5px;
+    }
+    button {
+      background: #b8860b;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      margin: 20px 0;
+      font-size: 1.1em;
+      cursor: pointer;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #d4af37;
+    }
+    #result {
+      display: none;
+      margin-top: 30px;
+      border: 2px solid #8b4513;
+      padding: 15px;
+      border-radius: 10px;
+      background: rgba(139, 69, 19, 0.2);
+    }
+    #qrcode {
+      margin: 20px auto;
+      text-align: center;
+    }
+    .ticket-link {
+      color: #4fc3f7;
+      word-break: break-all;
+      font-family: monospace;
+      font-size: 0.9em;
+    }
+    .pirate-symbol {
+      color: #ffcc00;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <div class="container">
+      <h1>🏴‍☠️ Генератор пиратских пропусков</h1>
+
+      <label for="name">Имя и фамилия гостя</label>
+      <input type="text" id="name" placeholder="Например: Сошникова Галина Сергеевна" />
+
+      <label for="table">Номер стола</label>
+      <select id="table">
+        <option value="1">Стол №1</option>
+        <option value="2">Стол №2</option>
+        <option value="3">Стол №3</option>
+        <option value="4">Стол №4</option>
+        <option value="5">Стол №5</option>
+        <option value="6">Стол №6</option>
+        <option value="7">Стол №7</option>
+        <option value="8">Стол №8</option>
+        <option value="9">Стол №9</option>
+        <option value="10">Стол №10</option>
+        <option value="11">Стол №11</option>
+        <option value="12">Стол №12</option>
+        <option value="13" selected>Стол №13</option>
+        <option value="14">Стол №14</option>
+        <option value="15">Стол №15</option>
+      </select>
+
+      <label for="seat">Место за столом</label>
+      <input type="number" id="seat" min="1" max="10" value="1" />
+
+      <button onclick="generate()">Сгенерировать билет 🏴‍☠️</button>
+
+      <div id="result">
+        <h2>Готово! <span class="pirate-symbol">⚓</span> Пропуск для <span id="result-name"></span></h2>
+        
+        <p><strong>Стол:</strong> <span id="result-table"></span></p>
+        <p><strong>Место:</strong> <span id="result-seat"></span></p>
+
+        <p><strong>Ссылка на билет:</strong></p>
+        <div class="ticket-link" id="ticket-link"></div>
+
+        <p><strong>QR-код для гостя:</strong></p>
+        <div id="qrcode"></div>
+
+        <p style="font-size:0.9em; margin-top:20px;">
+          Гость сканирует QR-код — попадает на персональную страницу с пропуском.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function generate() {
+      const name = document.getElementById("name").value.trim();
+      const table = document.getElementById("table").value;
+      const seat = document.getElementById("seat").value;
+
+      if (!name) {
+        alert("Введите имя и фамилию гостя!");
+        return;
+      }
+
+      // Симуляция ссылки (в реальности замените на свой домен)
+      const baseUrl = "https://pirate-party.github.io/ticket"; // ← ЗАМЕНИТЬ НА СВОЙ АДРЕС
+      const ticketUrl = `${baseUrl}?name=${encodeURIComponent(name)}&table=${table}&seat=${seat}&date=2025`;
+
+      document.getElementById("result-name").textContent = name;
+      document.getElementById("result-table").textContent = table;
+      document.getElementById("result-seat").textContent = seat;
+      document.getElementById("ticket-link").textContent = ticketUrl;
+
+      // Очистить предыдущий QR-код
+      document.getElementById("qrcode").innerHTML = "";
+      
+      // Сгенерировать новый QR-код
+      new QRCode(document.getElementById("qrcode"), {
+        text: ticketUrl,
+        width: 200,
+        height: 200
+      });
+
+      // Показать результат
+      document.getElementById("result").style.display = "block";
+    }
+  </script>
+</body>
+</html>
