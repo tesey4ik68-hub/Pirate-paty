@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Пиратский Пропуск</title>
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+  <meta property="og:title" content="🏴‍☠️ Ваш пиратский пропуск">
+  <meta property="og:description" content="Персональный билет на вечеринку 19 сентября 2025. Не опаздывать!">
+  <meta property="og:image" content="https://i.imgur.com/3KZJ9lX.jpg">
+  <meta property="og:url" content="https://ваш-сайт.netlify.app/ticket.html">
+  <meta property="og:type" content="website">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: url('https://i.imgur.com/3KZJ9lX.jpg') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Arial', sans-serif;
+      color: #f5d76e;
+      min-height: 100vh;
+    }
+    .overlay {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      border: 3px solid #b8860b;
+      border-radius: 15px;
+      background: rgba(0, 0, 0, 0.7);
+      box-shadow: 0 0 20px #b8860b;
+    }
+    h1 {
+      font-family: 'MedievalSharp', cursive;
+      font-size: 2.2em;
+      color: #d4af37;
+      text-align: center;
+      text-shadow: 2px 2px 5px #000;
+    }
+    h2 {
+      font-family: 'MedievalSharp', cursive;
+      color: #f5d76e;
+      border-bottom: 2px solid #b8860b;
+      padding-bottom: 10px;
+    }
+    .highlight {
+      color: #ffcc00;
+      font-weight: bold;
+    }
+    .pirate-symbol {
+      font-size: 1.5em;
+      vertical-align: middle;
+    }
+    footer {
+      text-align: center;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <div class="container">
+      <h1>🏴‍☠️ Пиратский Пропуск</h1>
+      <p><span class="pirate-symbol">⚓</span> Только для настоящих морских волков!</p>
+
+      <div style="border:2px solid #8b4513; padding:15px; border-radius:10px; background:rgba(139,69,19,0.2)">
+        <h2>Добро пожаловать, <span id="guest-name">Гость</span>!</h2>
+        <p><strong>Событие:</strong> 🏴‍☠️ Морская пиратская вечеринка</p>
+        <p><strong>Дата:</strong> 19 сентября 2025 года</p>
+        <p><strong>Место:</strong> Рыболовный клуб «Золотой Сазан»<br>
+           <em>Московская область, г.о. Подольск, д. Бережки</em></p>
+        <p><strong>Сбор:</strong> г. Дзержинский, ул. Овиновка, д. 17Б — <strong>12:00, не опаздывать!</strong></p>
+        <p><strong>Стол №:</strong> <span id="table" class="highlight">—</span></p>
+        <p><strong>Место:</strong> <span id="seat" class="highlight">—</span></p>
+      </div>
+
+      <footer>
+        ⚓ До встречи на борту! Приключение начинается!
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    // Чтение параметров из URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const name = urlParams.get('name') || 'Дорогой пират';
+    const table = urlParams.get('table') || '—';
+    const seat = urlParams.get('seat') || '—';
+
+    document.getElementById('guest-name').textContent = name;
+    document.getElementById('table').textContent = table;
+    document.getElementById('seat').textContent = seat;
+
+    // Обновляем OG-ссылку (не в браузере, но важно для кэша соцсетей)
+    document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
+    document.querySelector('meta[property="og:title"]').setAttribute('content', `🏴‍☠️ Билет для ${name}`);
+  </script>
+</body>
+</html>
