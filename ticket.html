@@ -85,19 +85,34 @@
   </div>
 
   <script>
+<<<<<<< HEAD
     // Чтение параметров из URL
+=======
+>>>>>>> ee871e72d4f9d96d8f9cd55d3ab555f80fcdc387
     const urlParams = new URLSearchParams(window.location.search);
     const name = urlParams.get('name') || 'Дорогой пират';
     const table = urlParams.get('table') || '—';
     const seat = urlParams.get('seat') || '—';
+<<<<<<< HEAD
 
     document.getElementById('guest-name').textContent = name;
     document.getElementById('table').textContent = table;
     document.getElementById('seat').textContent = seat;
 
     // Обновляем OG-ссылку (не в браузере, но важно для кэша соцсетей)
+=======
+  
+    document.getElementById('guest-name').textContent = name;
+    document.getElementById('table').textContent = table;
+    document.getElementById('seat').textContent = seat;
+  
+>>>>>>> ee871e72d4f9d96d8f9cd55d3ab555f80fcdc387
     document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
     document.querySelector('meta[property="og:title"]').setAttribute('content', `🏴‍☠️ Билет для ${name}`);
   </script>
 </body>
+<<<<<<< HEAD
 </html>
+=======
+</html>
+>>>>>>> ee871e72d4f9d96d8f9cd55d3ab555f80fcdc387
