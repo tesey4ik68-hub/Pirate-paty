@@ -9,9 +9,9 @@
   <title>Королевский Пиратский Пропуск</title>
   
   <!-- Open Graph мета-теги -->
-  <meta property="og:title" content="👑 Пропуск Королевы пиратов" />
+  <meta property="og:title" content="👑 Королевский Пиратский Пропуск" />
   <meta property="og:description" content="Добро пожаловать на борт, Ваше Величество! Ваш королевский пиратский пропуск на вечеринку 19 сентября 2025." />
-  <meta property="og:image" content="https://i.imgur.com/rX8e8Nt.jpg" />
+  <meta property="og:image" content="https://i.yapx.ru/aZGzI.png" />
   <meta property="og:url" content="https://your-link-here.com/royal-pirat-ticket" />
   <meta property="og:type" content="website" />
   
@@ -20,7 +20,7 @@
     body {
       margin: 0;
       padding: 0;
-      background: url('https://i.imgur.com/rX8e8Nt.jpg') no-repeat center center fixed;
+      background: url('https://i.yapx.ru/aZGzI.png') no-repeat center center fixed;
       background-size: cover;
       font-family: 'Arial', sans-serif;
       color: #ffb6c1;
@@ -151,12 +151,14 @@
     const name = urlParams.get('name') || 'Ваше Величество';
     const table = urlParams.get('table') || '—';
     const seat = urlParams.get('seat') || '—';
+    const passNumber = urlParams.get('pass-number') || '—';
 
     // Заполняем данные для королевского шаблона
     document.getElementById('guest-name').textContent = name;
     document.getElementById('table').textContent = table;
     document.getElementById('seat').textContent = seat;
     document.getElementById('footer-name').textContent = name.split(' ')[0] || name;
+    document.getElementById('pass-number').textContent = passNumber;
     
     // Обновляем мета-теги Open Graph
     document.querySelector('meta[property="og:title"]').setAttribute('content', `👑 Королевский Пиратский Пропуск для ${name}`);
