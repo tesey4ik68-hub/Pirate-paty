@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Генератор пиратских билетов</title>
+  <!-- Подключаем QRCode.js с CDN -->
   <script src="https://cdn.jsdelivr.net/npm/qrcode.js/lib/qrcode.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
   <style>
@@ -148,9 +149,8 @@
         return;
       }
 
-      // Симуляция ссылки (в реальности замените на свой домен)
-      const baseUrl = "https://pirat-party.netlify.app/ticket.html"; // ← ЗАМЕНИТЬ НА СВОЙ АДРЕС
-      const ticketUrl = `${baseUrl}?name=${encodeURIComponent(name)}&table=${table}&seat=${seat}&date=2025`;
+      // 🔗 Замени на свой URL
+      const ticketUrl = `https://pirat-party.netlify.app/ticket.html?name=${encodeURIComponent(name)}&table=${table}&seat=${seat}`;
 
       document.getElementById("result-name").textContent = name;
       document.getElementById("result-table").textContent = table;
@@ -158,16 +158,18 @@
       document.getElementById("ticket-link").textContent = ticketUrl;
 
       // Очистить предыдущий QR-код
-      document.getElementById("qrcode").innerHTML = "";
-      
+      const qrcodeDiv = document.getElementById("qrcode");
+      qrcodeDiv.innerHTML = ""; // Убедимся, что чисто
+
       // Сгенерировать новый QR-код
-      new QRCode(document.getElementById("qrcode"), {
+      new QRCode(qrcodeDiv, {
         text: ticketUrl,
         width: 200,
-        height: 200
+        height: 200,
+        correctLevel: QRCode.CorrectLevel.H // Лучшее распознавание
       });
 
-      // Показать результат
+      // Показать блок с результатом
       document.getElementById("result").style.display = "block";
     }
   </script>
