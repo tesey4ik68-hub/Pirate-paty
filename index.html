@@ -1,59 +1,385 @@
-  <script>
-    function generate() {
-      try {
-        console.log("Начало генерации билета");
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Генератор пиратских билетов</title>
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: url('https://i.imgur.com/3KZJ9lX.jpg') no-repeat center center fixed;
+      background-size: cover;
+      font-family: 'Arial', sans-serif;
+      color: #f5d76e;
+    }
+    .overlay {
+      background: rgba(0, 0, 0, 0.8);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: rgba(0, 0, 0, 0.7);
+      border: 3px solid #b8860b;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 0 20px #b8860b;
+    }
+    h1 {
+      font-family: 'MedievalSharp', cursive;
+      text-align: center;
+      color: #d4af37;
+      font-size: 2.2em;
+      text-shadow: 2px 2px 5px #000;
+    }
+    label {
+      display: block;
+      margin: 15px 0 5px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #b8860b;
+      background: #111;
+      color: #fff;
+      border-radius: 5px;
+    }
+    button {
+      background: #b8860b;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      margin: 20px 5px 20px 0;
+      font-size: 1.1em;
+      cursor: pointer;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #d4af37;
+    }
+    #result {
+      display: none;
+      margin-top: 30px;
+      border: 2px solid #8b4513;
+      padding: 15px;
+      border-radius: 10px;
+      background: rgba(139, 69, 19, 0.2);
+    }
+    .ticket-link {
+      color: #4fc3f7;
+      word-break: break-all;
+      font-family: monospace;
+      font-size: 0.9em;
+    }
+    .pirate-symbol {
+      color: #ffcc00;
+    }
+    .warning {
+      background-color: #b8860b;
+      color: #000;
+      padding: 10px;
+      border-radius: 5px;
+      margin: 10px 0;
+      font-weight: bold;
+    }
+    .pass-list {
+      margin-top: 30px;
+      border: 2px solid #8b4513;
+      padding: 15px;
+      border-radius: 10px;
+      background: rgba(139, 69, 19, 0.2);
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .pass-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #b8860b;
+    }
+    .pass-item:last-child {
+      border-bottom: none;
+    }
+    .pass-info {
+      flex-grow: 1;
+    }
+    .pass-actions button {
+      margin: 0 2px;
+      padding: 5px 10px;
+      font-size: 0.9em;
+    }
+    .delete-btn {
+      background: #8b0000;
+    }
+    .delete-btn:hover {
+      background: #a52a2a;
+    }
+    .view-btn {
+      background: #006400;
+    }
+    .view-btn:hover {
+      background: #228b22;
+    }
+    .table-group {
+      margin-top: 20px;
+      border: 1px solid #b8860b;
+      border-radius: 5px;
+      padding: 10px;
+      background: rgba(184, 134, 11, 0.1);
+    }
+    .table-header {
+      font-weight: bold;
+      color: #d4af37;
+      border-bottom: 1px solid #b8860b;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+    }
+    .table-pass-item {
+      padding: 5px 0;
+      border-bottom: 1px dashed #b8860b;
+    }
+    .table-pass-item:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <div class="container">
+      <h1>🏴‍☠️ Генератор пиратских пропусков</h1>
+
+      <div class="warning">
+        ⚠️ Внимание: При повторной генерации пропуска для того же имени или места данные будут перезаписаны!
+      </div>
+
+      <label for="name">Имя и фамилия гостя</label>
+      <input type="text" id="name" placeholder="Например: Сошникова Галина Сергеевна" />
+
+      <label for="gender">Пол гостя</label>
+      <select id="gender">
+        <option value="male">Мужской</option>
+        <option value="female">Женский</option>
+      </select>
+
+      <label for="table">Номер стола</label>
+      <select id="table">
+        <option value="1">Стол №1</option>
+        <option value="2">Стол №2</option>
+        <option value="3">Стол №3</option>
+        <option value="4">Стол №4</option>
+        <option value="5">Стол №5</option>
+        <option value="6">Стол №6</option>
+        <option value="7">Стол №7</option>
+        <option value="8">Стол №8</option>
+        <option value="9">Стол №9</option>
+        <option value="10">Стол №10</option>
+        <option value="11">Стол №11</option>
+        <option value="12">Стол №12</option>
+        <option value="13" selected>Стол №13</option>
+        <option value="14">Стол №14</option>
+        <option value="15">Стол №15</option>
+      </select>
+
+      <label for="seat">Место за столом</label>
+      <input type="number" id="seat" min="1" max="10" value="1" />
+
+      <button onclick="generate()">Сгенерировать билет 🏴‍☠️</button>
+      <button onclick="loadPasses()">Обновить список</button>
+      <button onclick="showTableGroups()">Группировка по столам</button>
+
+      <div id="result">
+        <h2>Готово! <span class="pirate-symbol">⚓</span> Пропуск для <span id="result-name"></span></h2>
         
+        <p><strong>Пол:</strong> <span id="result-gender"></span></p>
+        <p><strong>Стол:</strong> <span id="result-table"></span></p>
+        <p><strong>Место:</strong> <span id="result-seat"></span></p>
+
+        <p><strong>Ссылка на билет:</strong></p>
+        <div class="ticket-link" id="ticket-link"></div>
+
+        <p style="font-size:0.9em; margin-top:20px;">
+          Отправьте эту ссылку гостю для доступа к персональному пропуску.
+        </p>
+      </div>
+
+      <div class="pass-list">
+        <h2>Созданные пропуски</h2>
+        <div id="passes-container">
+          <!-- Список пропусков будет здесь -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Инициализация хранилища пропусков
+    function initPassStorage() {
+      if (!localStorage.getItem('piratePasses')) {
+        localStorage.setItem('piratePasses', JSON.stringify([]));
+      }
+    }
+
+    // Сохранение пропуска
+    function savePass(name, gender, table, seat) {
+      initPassStorage();
+      const passes = JSON.parse(localStorage.getItem('piratePasses'));
+      
+      // Проверяем, существует ли уже пропуск с таким именем
+      const existingIndex = passes.findIndex(pass => pass.name === name);
+      
+      const pass = {
+        name: name,
+        gender: gender,
+        table: table,
+        seat: seat,
+        timestamp: new Date().toISOString()
+      };
+      
+      if (existingIndex >= 0) {
+        // Обновляем существующий пропуск
+        passes[existingIndex] = pass;
+      } else {
+        // Добавляем новый пропуск
+        passes.push(pass);
+      }
+      
+      localStorage.setItem('piratePasses', JSON.stringify(passes));
+    }
+
+    // Удаление пропуска
+    function deletePass(name) {
+      if (confirm(`Вы уверены, что хотите удалить пропуск для ${name}?`)) {
+        const passes = JSON.parse(localStorage.getItem('piratePasses'));
+        const updatedPasses = passes.filter(pass => pass.name !== name);
+        localStorage.setItem('piratePasses', JSON.stringify(updatedPasses));
+        loadPasses(); // Обновляем список
+      }
+    }
+
+    // Загрузка и отображение списка пропусков
+    function loadPasses() {
+      initPassStorage();
+      const passes = JSON.parse(localStorage.getItem('piratePasses'));
+      const container = document.getElementById('passes-container');
+      
+      if (passes.length === 0) {
+        container.innerHTML = '<p>Пока не создано ни одного пропуска.</p>';
+        return;
+      }
+      
+      container.innerHTML = passes.map(pass => `
+        <div class="pass-item">
+          <div class="pass-info">
+            <strong>${pass.name}</strong> (${pass.gender === 'male' ? 'М' : 'Ж'})<br>
+            Стол: ${pass.table}, Место: ${pass.seat}
+          </div>
+          <div class="pass-actions">
+            <button class="view-btn" onclick="viewPass('${pass.name}', '${pass.gender}', '${pass.table}', '${pass.seat}')">Открыть</button>
+            <button class="delete-btn" onclick="deletePass('${pass.name}')">Удалить</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Группировка по столам
+    function showTableGroups() {
+      initPassStorage();
+      const passes = JSON.parse(localStorage.getItem('piratePasses'));
+      const container = document.getElementById('passes-container');
+      
+      if (passes.length === 0) {
+        container.innerHTML = '<p>Пока не создано ни одного пропуска.</p>';
+        return;
+      }
+      
+      // Группируем по столам
+      const tables = {};
+      passes.forEach(pass => {
+        if (!tables[pass.table]) {
+          tables[pass.table] = [];
+        }
+        tables[pass.table].push(pass);
+      });
+      
+      // Сортируем столы и гостей
+      const sortedTables = Object.keys(tables).sort((a, b) => parseInt(a) - parseInt(b));
+      
+      container.innerHTML = sortedTables.map(table => `
+        <div class="table-group">
+          <div class="table-header">Стол №${table}</div>
+          ${tables[table].map(pass => `
+            <div class="table-pass-item">
+              <strong>${pass.name}</strong> (${pass.gender === 'male' ? 'М' : 'Ж'}) - Место: ${pass.seat}
+              <div style="float: right;">
+                <button class="view-btn" onclick="viewPass('${pass.name}', '${pass.gender}', '${pass.table}', '${pass.seat}')" style="padding: 2px 5px; font-size: 0.8em;">Открыть</button>
+                <button class="delete-btn" onclick="deletePass('${pass.name}')" style="padding: 2px 5px; font-size: 0.8em;">Удалить</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `).join('');
+    }
+
+    // Открытие пропуска
+    function viewPass(name, gender, table, seat) {
+      const ticketUrl = `ticket.html?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}`;
+      window.open(ticketUrl, '_blank');
+    }
+
+    function generate() {
+      console.log("Функция generate() вызвана");
+      
+      try {
         const name = document.getElementById("name").value.trim();
+        const gender = document.getElementById("gender").value;
         const table = document.getElementById("table").value;
         const seat = document.getElementById("seat").value;
 
-        console.log("Полученные данные:", {name, table, seat});
+        console.log("Полученные данные:", {name, gender, table, seat});
 
         if (!name) {
           alert("Введите имя и фамилию гостя!");
+          console.log("Имя не введено, показано предупреждение");
           return;
         }
 
+        // Сохраняем пропуск
+        savePass(name, gender, table, seat);
+
         // 🔗 Используем относительный путь к ticket.html
-        const ticketUrl = `ticket.html?name=${encodeURIComponent(name)}&table=${table}&seat=${seat}`;
+        const ticketUrl = `ticket.html?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}`;
         console.log("Сформированный URL:", ticketUrl);
 
         document.getElementById("result-name").textContent = name;
+        document.getElementById("result-gender").textContent = gender === 'male' ? 'Мужской' : 'Женский';
         document.getElementById("result-table").textContent = table;
         document.getElementById("result-seat").textContent = seat;
-        document.getElementById("ticket-link").textContent = ticketUrl;
-
-        // Очистить предыдущий QR-код
-        const qrcodeDiv = document.getElementById("qrcode");
-        qrcodeDiv.innerHTML = ""; // Убедимся, что чисто
-
-        // Проверим, доступна ли библиотека QRCode
-        if (typeof QRCode === 'undefined') {
-          console.error("Библиотека QRCode не загружена");
-          alert("Ошибка: библиотека QRCode не загружена");
-          return;
-        }
-
-        console.log("Генерируем QR-код");
-
-        // Сгенерировать новый QR-код
-        new QRCode(qrcodeDiv, {
-          text: ticketUrl,
-          width: 200,
-          height: 200,
-          correctLevel: QRCode.CorrectLevel.H // Лучшее распознавание
-        });
-
-        console.log("QR-код успешно сгенерирован");
+        document.getElementById("ticket-link").innerHTML = `<a href="${ticketUrl}" target="_blank">${ticketUrl}</a>`;
 
         // Показать блок с результатом
         document.getElementById("result").style.display = "block";
         console.log("Результат отображен");
+        
+        // Обновляем список пропусков
+        loadPasses();
       } catch (error) {
         console.error("Ошибка при генерации билета:", error);
         alert("Произошла ошибка при генерации билета: " + error.message);
       }
+      
+      console.log("Функция generate() завершена");
     }
+
+    // Загружаем список пропусков при открытии страницы
+    document.addEventListener('DOMContentLoaded', function() {
+      loadPasses();
+    });
   </script>
 </body>
 </html>
