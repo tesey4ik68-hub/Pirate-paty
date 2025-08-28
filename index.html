@@ -368,7 +368,7 @@
       }
 
       // Отправляем данные на сервер
-      fetch('server/api.php', {
+      fetch('/server/api.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -498,7 +498,7 @@
 
     // Загрузка и отображение списка пропусков
     function loadPasses() {
-      fetch('server/api.php')
+      fetch('/server/api.php')
         .then(response => response.json())
         .then(passes => {
           if (!Array.isArray(passes) && passes.error) {

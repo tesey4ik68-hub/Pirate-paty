@@ -57,6 +57,24 @@ Pirate-paty-main/
 1. Загрузите все файлы на хостинг с поддержкой PHP и MySQL
 2. Настройте подключение к базе данных в `server/config.php`
 
+## Решение проблем с маршрутизацией
+
+Если при попытке доступа к API по адресу `http://ваш-домен.ru/server/api.php` возникает ошибка 404, убедитесь, что:
+
+1. Файл [.htaccess](file://c:\Users\aasolomennikov\Desktop\ID%20программ\Pirate-paty-main\.htaccess) находится в корневой директории сайта
+2. В [.htaccess](file://c:\Users\aasolomennikov\Desktop\ID%20программ\Pirate-paty-main\.htaccess) содержатся правильные правила маршрутизации:
+   ```
+   RewriteEngine On
+   RewriteRule ^api/(.*)$ server/api.php [QSA,L]
+   RewriteRule ^server/api\.php$ server/api.php [QSA,L]
+   
+   RewriteCond %{REQUEST_FILENAME} !-f
+   RewriteCond %{REQUEST_FILENAME} !-d
+   RewriteRule ^(.*)$ index.html [QSA,L]
+   ```
+
+3. Папка `server` и файл `api.php` находятся в правильном месте
+
 ## Использование системы
 
 1. Откройте `index.html` в браузере
