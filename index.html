@@ -361,8 +361,9 @@
 
     // Функция поделиться
     function sharePass(name, gender, table, seat, passNumber) {
-      const ticketUrl = window.location.href.replace('index.html', '') + 
-        getTicketFileName(name, gender) + `?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
+      const baseUrl = window.location.href.replace('index.html', '');
+      const ticketFileName = getTicketFileName(name, gender);
+      const ticketUrl = `${baseUrl}${ticketFileName}?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
       
       // Определяем тип гостя для персонализации сообщения
       const fullName = name.toLowerCase();
@@ -540,8 +541,10 @@
         // Сохраняем пропуск
         savePass(name, gender, table, seat);
 
-        // 🔗 Используем относительный путь к ticket.html
-        const ticketUrl = `ticket.html?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
+        // 🔗 Используем абсолютный путь к ticket.html для обеспечения работы на мобильных устройствах
+        const baseUrl = window.location.href.replace('index.html', '');
+        const ticketFileName = gender === 'female' ? 'ticket_female.html' : 'ticket.html';
+        const ticketUrl = `${baseUrl}${ticketFileName}?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
         console.log("Сформированный URL:", ticketUrl);
 
         document.getElementById("result-name").textContent = name;
@@ -567,8 +570,9 @@
 
     // Функция копирования приглашения из списка пропусков
     function copyPassInvitation(name, gender, table, seat, passNumber) {
-      const ticketUrl = window.location.href.replace('index.html', '') + 
-        getTicketFileName(name, gender) + `?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
+      const baseUrl = window.location.href.replace('index.html', '');
+      const ticketFileName = getTicketFileName(name, gender);
+      const ticketUrl = `${baseUrl}${ticketFileName}?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
       
       // Определяем тип гостя для персонализации сообщения
       const fullName = name.toLowerCase();
@@ -589,20 +593,26 @@
         shareHtml = `<div style="font-family: Arial, sans-serif; max-width: 600px;">🏴‍☠️ Добро пожаловать на борт, ${name}!<br>Вот ваш <b>персональный пиратский пропуск №${passNumber}</b>:<br><a href="${ticketUrl}" target="_blank">${ticketUrl}</a><br>Ваше место: стол №${table}, место №${seat}<br>⚓ Ждём вас 19 сентября!</div>`;
       }
       
-      // Копируем текст в буфер обмена
-      copyToClipboard(shareText);
+      // Копируем текст и HTML в буфер обмена
+      copyToClipboard(shareText, shareHtml);
     }
 
     // Функция копирования приглашения
     function copyInvitation() {
-      const name = document.getElementById("result-name").textContent;
-      const gender = document.getElementById("result-gender").textContent;
-      const table = document.getElementById("result-table").textContent;
-      const seat = document.getElementById("result-seat").textContent;
-      const ticketLink = document.querySelector("#ticket-link a").href;
+      initPassStorage();
+      const passes = JSON.parse(localStorage.getItem('piratePasses'));
       
-      // Генерируем номер пропуска
-      const passNumber = generatePassNumber(name, gender === 'Мужской' ? 'male' : 'female', table, seat);
+      const name = document.getElementById("result-name").textContent;
+      const pass = passes.find(p => p.name === name);
+      
+      if (!pass) {
+        alert("Не найден пропуск для копирования!");
+        return;
+      }
+      
+      const { gender, table, seat, passNumber } = pass;
+      
+      // Определяем тип гостя для персонализации сообщения
       
       // Определяем тип гостя для персонализации сообщения
       const fullName = name.toLowerCase();
