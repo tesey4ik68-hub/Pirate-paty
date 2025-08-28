@@ -106,6 +106,30 @@
     .pass-item:last-child {
       border-bottom: none;
     }
+    
+    .pass-number {
+      background: #4169e1;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    
+    .copy-pass-number-btn {
+      background: #4169e1;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      margin-left: 5px;
+      font-size: 0.9em;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    
+    .copy-pass-number-btn:hover {
+      background: #6495ed;
+    }
     .pass-info {
       flex-grow: 1;
     }
@@ -313,9 +337,8 @@
         return guestInfo.number;
       } else {
         // Для обычных гостей: №стола + номер места + " - " + первая буква имени (заглавная всегда)
-        // Изменяем формат, чтобы избежать проблем с символами в URL
         const firstLetter = name.charAt(0).toUpperCase();
-        return `${table}${seat}-${firstLetter}`;
+        return `${table}${seat} - ${firstLetter}`;
       }
     }
 
@@ -364,7 +387,7 @@
     function sharePass(name, gender, table, seat, passNumber) {
       const baseUrl = window.location.href.replace('index.html', '');
       const ticketFileName = getTicketFileName(name, gender);
-      const ticketUrl = `${baseUrl}${ticketFileName}?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
+      const ticketUrl = `${baseUrl}${ticketFileName}?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${encodeURIComponent(passNumber)}`;
       
       // Определяем тип гостя для персонализации сообщения
       const fullName = name.toLowerCase();
@@ -441,11 +464,12 @@
           <div class="pass-item">
             <div class="pass-info">
               <strong>${royalSymbol} ${pass.name}</strong> ${guestType} (${pass.gender === 'male' ? 'М' : 'Ж'})<br>
-              Стол: ${pass.table}, Место: ${pass.seat}, №: ${pass.passNumber}
+              Стол: ${pass.table}, Место: ${pass.seat} <span class="pass-number">№${pass.passNumber}</span>
             </div>
             <div class="pass-actions">
               <button class="view-btn" onclick="viewPass('${pass.name}', '${pass.gender}', '${pass.table}', '${pass.seat}', '${pass.passNumber}')">Открыть</button>
               <button class="share-btn" onclick="sharePass('${pass.name}', '${pass.gender}', '${pass.table}', '${pass.seat}', '${pass.passNumber}')">Поделиться</button>
+              <button class="copy-pass-number-btn" onclick="copyPassNumber('${pass.passNumber}')">Копировать №</button>
               <button class="copy-btn" onclick="copyPassInvitation('${pass.name}', '${pass.gender}', '${pass.table}', '${pass.seat}', '${pass.passNumber}')">Копировать</button>
               <button class="delete-btn" onclick="deletePass('${pass.name}')">Удалить</button>
             </div>
@@ -515,10 +539,39 @@
 
     // Открытие пропуска
     function viewPass(name, gender, table, seat, passNumber) {
-      const ticketUrl = `ticket.html?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
+      const ticketUrl = `${getTicketFileName(name, gender)}?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${encodeURIComponent(passNumber)}`;
       window.open(ticketUrl, '_blank');
     }
 
+    // Функция копирования приглашения
+    function copyInvitation() {
+      const name = document.getElementById("result-name").textContent;
+      const gender = document.getElementById("result-gender").textContent;
+      const table = document.getElementById("result-table").textContent;
+      const seat = document.getElementById("result-seat").textContent;
+      const ticketLink = document.querySelector("#ticket-link a").href;
+      
+      // Генерируем номер пропуска
+      const passNumber = generatePassNumber(name, gender === 'Мужской' ? 'male' : 'female', table, seat);
+      
+      // Определяем тип гостя для персонализации сообщения
+      const fullName = name.toLowerCase();
+      let shareText;
+      
+      if (fullName.includes('панаморенко')) {
+        shareText = `👑 Добро пожаловать на борт, Ваше Величество ${name}!\nВот ваш королевский пиратский пропуск №${passNumber}:\n${ticketLink}\nВаше место: стол №${table}, место №${seat}\n⚜️ Ждём вас 19 сентября!`;
+      } else if (fullName.includes('вешкина') && gender === 'Женский') {
+        shareText = `👸 Добро пожаловать на борт, юная принцесса ${name}!\nВот ваш пропуск принцессы пиратов №${passNumber}:\n${ticketLink}\nВаше место: стол №${table}, место №${seat}\n🎀 Ждём вас 19 сентября!`;
+      } else if (fullName.includes('бурец') && gender === 'Мужской') {
+        shareText = `🤴 Добро пожаловать на борт, юный принц ${name}!\nВот ваш пропуск принца пиратов №${passNumber}:\n${ticketLink}\nВаше место: стол №${table}, место №${seat}\n🛡️ Ждём вас 19 сентября!`;
+      } else {
+        shareText = `🏴‍☠️ Добро пожаловать на борт, ${name}!\nВот ваш персональный пиратский пропуск №${passNumber}:\n${ticketLink}\nВаше место: стол №${table}, место №${seat}\n⚓ Ждём вас 19 сентября!`;
+      }
+      
+      // Копируем текст в буфер обмена
+      copyToClipboard(shareText);
+    }
+    
     function generate() {
       console.log("Функция generate() вызвана");
       
@@ -544,8 +597,8 @@
 
         // 🔗 Используем абсолютный путь к ticket.html для обеспечения работы на мобильных устройствах
         const baseUrl = window.location.href.replace('index.html', '');
-        const ticketFileName = gender === 'female' ? 'ticket_female.html' : 'ticket.html';
-        const ticketUrl = `${baseUrl}${ticketFileName}?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
+        const ticketFileName = getTicketFileName(name, gender);
+        const ticketUrl = `${baseUrl}${ticketFileName}?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${encodeURIComponent(passNumber)}`;
         console.log("Сформированный URL:", ticketUrl);
 
         document.getElementById("result-name").textContent = name;
@@ -569,11 +622,16 @@
       console.log("Функция generate() завершена");
     }
 
+    // Функция копирования номера пропуска
+    function copyPassNumber(passNumber) {
+      copyToClipboard(passNumber);
+    }
+      
     // Функция копирования приглашения из списка пропусков
     function copyPassInvitation(name, gender, table, seat, passNumber) {
       const baseUrl = window.location.href.replace('index.html', '');
       const ticketFileName = getTicketFileName(name, gender);
-      const ticketUrl = `${baseUrl}${ticketFileName}?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
+      const ticketUrl = `${baseUrl}${ticketFileName}?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${encodeURIComponent(passNumber)}`;
       
       // Определяем тип гостя для персонализации сообщения
       const fullName = name.toLowerCase();
@@ -598,41 +656,6 @@
       copyToClipboard(shareText, shareHtml);
     }
 
-    // Функция копирования приглашения
-    function copyInvitation() {
-      initPassStorage();
-      const passes = JSON.parse(localStorage.getItem('piratePasses'));
-      
-      const name = document.getElementById("result-name").textContent;
-      const pass = passes.find(p => p.name === name);
-      
-      if (!pass) {
-        alert("Не найден пропуск для копирования!");
-        return;
-      }
-      
-      const { gender, table, seat, passNumber } = pass;
-      
-      // Определяем тип гостя для персонализации сообщения
-      
-      // Определяем тип гостя для персонализации сообщения
-      const fullName = name.toLowerCase();
-      let shareText;
-      
-      if (fullName.includes('панаморенко')) {
-        shareText = `👑 Добро пожаловать на борт, Ваше Величество ${name}!\nВот ваш королевский пиратский пропуск №${passNumber}:\n${ticketLink}\nВаше место: стол №${table}, место №${seat}\n⚜️ Ждём вас 19 сентября!`;
-      } else if (fullName.includes('вешкина') && gender === 'Женский') {
-        shareText = `👸 Добро пожаловать на борт, юная принцесса ${name}!\nВот ваш пропуск принцессы пиратов №${passNumber}:\n${ticketLink}\nВаше место: стол №${table}, место №${seat}\n🎀 Ждём вас 19 сентября!`;
-      } else if (fullName.includes('бурец') && gender === 'Мужской') {
-        shareText = `🤴 Добро пожаловать на борт, юный принц ${name}!\nВот ваш пропуск принца пиратов №${passNumber}:\n${ticketLink}\nВаше место: стол №${table}, место №${seat}\n🛡️ Ждём вас 19 сентября!`;
-      } else {
-        shareText = `🏴‍☠️ Добро пожаловать на борт, ${name}!\nВот ваш персональный пиратский пропуск №${passNumber}:\n${ticketLink}\nВаше место: стол №${table}, место №${seat}\n⚓ Ждём вас 19 сентября!`;
-      }
-      
-      // Копируем текст в буфер обмена
-      copyToClipboard(shareText);
-    }
-    
     // Упрощенная функция копирования текста в буфер обмена
     function copyToClipboard(text) {
       // Проверяем, поддерживается ли современный API буфера обмена

@@ -101,7 +101,7 @@
       </header>
 
       <div class="ticket">
-        <h2>Добро пожаловать на борт, юный принц!</h2>
+        <h2>Добро пожаловать на борт, принц!</h2>
         <p><strong>Имя владельца:</strong> <span class="highlight" id="guest-name">Юный принц</span></p>
         <p><strong>Номер пропуска:</strong> <span class="highlight" id="pass-number">—</span></p>
         <p><strong>Событие:</strong> 🏴‍☠️ Морская пиратская вечеринка</p>
@@ -162,8 +162,8 @@
     document.getElementById('pass-number').textContent = passNumber;
     
     // Обновляем мета-теги Open Graph
-    document.querySelector('meta[property="og:title"]').setAttribute('content', `🤴 Принцеский Пиратский Пропуск для ${name}`);
-    document.querySelector('meta[property="og:description"]').setAttribute('content', `🤴 Добро пожаловать на борт, юный принц ${name}!\n\nВот ваш пропуск принца пиратов №${passNumber}.\n\nВаше место: стол №${table}, место №${seat}\n\n🛡️ Ждём вас 19 сентября!`);
+    document.querySelector('meta[property="og:title"]').setAttribute('content', `🤴 Пропуск принца пиратов для ${name}`);
+    document.querySelector('meta[property="og:description"]').setAttribute('content', `🤴 Добро пожаловать на борт, принц ${name}!\n\nВот ваш пропуск принца пиратов №${passNumber}.\n\nВаше место: стол №${table}, место №${seat}\n\n🛡️ Ждём вас 19 сентября!`);
     document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
   </script>
 </body>
