@@ -271,9 +271,11 @@
   </div>
 
   <script>
-    // Инициализация хранилища пропусков (не требуется для серверного хранения)
+    // Инициализация хранилища пропусков
     function initPassStorage() {
-      // Не требуется для серверного хранения
+      if (!localStorage.getItem('piratePasses')) {
+        localStorage.setItem('piratePasses', JSON.stringify([]));
+      }
     }
 
     // Определение типа гостя
@@ -341,87 +343,43 @@
 
     // Сохранение пропуска
     function savePass(name, gender, table, seat) {
+      initPassStorage();
+      const passes = JSON.parse(localStorage.getItem('piratePasses'));
+      
+      // Проверяем, существует ли уже пропуск с таким именем
+      const existingIndex = passes.findIndex(pass => pass.name === name);
+      
+      // Генерируем номер пропуска
       const passNumber = generatePassNumber(name, gender, table, seat);
       
       const pass = {
         name: name,
         gender: gender,
-        table_number: table,
-        seat_number: seat,
-        pass_number: passNumber
+        table: table,
+        seat: seat,
+        passNumber: passNumber,
+        timestamp: new Date().toISOString()
       };
       
-      // Common function to handle API responses
-      function handleApiResponse(response) {
-        // Check if response is OK (status 200-299)
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        // Check if response is JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error('Server responded with non-JSON data');
-        }
-        
-        return response.json();
+      if (existingIndex >= 0) {
+        // Обновляем существующий пропуск
+        passes[existingIndex] = pass;
+      } else {
+        // Добавляем новый пропуск
+        passes.push(pass);
       }
-
-      // Отправляем данные на сервер
-      fetch('/server/api.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(pass)
-      })
-      .then(handleApiResponse)
-      .then(data => {
-        if (data.error) {
-          if (data.error.includes('уже существует')) {
-            // Если пропуск уже существует, обновляем его
-            updatePass(name, gender, table, seat);
-          } else {
-            alert('Ошибка при сохранении пропуска: ' + data.error);
-          }
-        } else {
-          console.log('Пропуск успешно сохранен');
-        }
-      })
-      .catch(error => {
-        console.error('Ошибка:', error);
-        alert('Произошла ошибка при сохранении пропуска: ' + error.message);
-      });
+      
+      localStorage.setItem('piratePasses', JSON.stringify(passes));
     }
 
     // Удаление пропуска
     function deletePass(name) {
-      if (!confirm(`Вы уверены, что хотите удалить пропуск для ${name}?`)) {
-        return;
+      if (confirm(`Вы уверены, что хотите удалить пропуск для ${name}?`)) {
+        const passes = JSON.parse(localStorage.getItem('piratePasses'));
+        const updatedPasses = passes.filter(pass => pass.name !== name);
+        localStorage.setItem('piratePasses', JSON.stringify(updatedPasses));
+        loadPasses(); // Обновляем список
       }
-      
-      const data = { name: name };
-      
-      fetch('server/api.php', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      })
-      .then(handleApiResponse)
-      .then(data => {
-        if (data.error) {
-          alert('Ошибка при удалении пропуска: ' + data.error);
-        } else {
-          console.log('Пропуск успешно удален');
-          loadPasses(); // Обновляем список
-        }
-      })
-      .catch(error => {
-        console.error('Ошибка:', error);
-        alert('Произошла ошибка при удалении пропуска: ' + error.message);
-      });
     }
 
     // Функция поделиться
@@ -498,57 +456,47 @@
 
     // Загрузка и отображение списка пропусков
     function loadPasses() {
-      fetch('/server/api.php')
-        .then(response => response.json())
-        .then(passes => {
-          if (!Array.isArray(passes) && passes.error) {
-            throw new Error(passes.error);
-          }
-          
-          const container = document.getElementById('passes-container');
-          
-          if (passes.length === 0) {
-            container.innerHTML = '<p>Пока не создано ни одного пропуска.</p>';
-            return;
-          }
-          
-          container.innerHTML = passes.map(pass => {
-            // Определяем тип гостя
-            const fullName = pass.name.toLowerCase();
-            let royalSymbol = '';
-            let guestType = '';
-            
-            if (fullName.includes('панаморенко')) {
-              royalSymbol = pass.gender === 'male' ? '👑' : '👑';
-              guestType = ' (Королевский)';
-            } else if (fullName.includes('вешкина') && pass.gender === 'female') {
-              royalSymbol = '👸';
-              guestType = ' (Принцесса)';
-            } else if (fullName.includes('бурец') && pass.gender === 'male') {
-              royalSymbol = '🤴';
-              guestType = ' (Принц)';
-            }
-            
-            return `
-              <div class="pass-item">
-                <div class="pass-info">
-                  <strong>${royalSymbol} ${pass.name}</strong> ${guestType} (${pass.gender === 'male' ? 'М' : 'Ж'})<br>
-                  Стол: ${pass.table_number}, Место: ${pass.seat_number}, №: ${pass.pass_number}
-                </div>
-                <div class="pass-actions">
-                  <button class="view-btn" onclick="viewPass('${pass.name}', '${pass.gender}', '${pass.table_number}', '${pass.seat_number}', '${pass.pass_number}')">Открыть</button>
-                  <button class="share-btn" onclick="sharePass('${pass.name}', '${pass.gender}', '${pass.table_number}', '${pass.seat_number}', '${pass.pass_number}')">Поделиться</button>
-                  <button class="copy-btn" onclick="copyPassInvitation('${pass.name}', '${pass.gender}', '${pass.table_number}', '${pass.seat_number}', '${pass.pass_number}')">Копировать</button>
-                  <button class="delete-btn" onclick="deletePass('${pass.name}')">Удалить</button>
-                </div>
-              </div>
-            `;
-          }).join('');
-        })
-        .catch(error => {
-          console.error('Ошибка при загрузке пропусков:', error);
-          document.getElementById('passes-container').innerHTML = '<p>Ошибка при загрузке пропусков: ' + error.message + '</p>';
-        });
+      initPassStorage();
+      const passes = JSON.parse(localStorage.getItem('piratePasses'));
+      const container = document.getElementById('passes-container');
+      
+      if (passes.length === 0) {
+        container.innerHTML = '<p>Пока не создано ни одного пропуска.</p>';
+        return;
+      }
+      
+      container.innerHTML = passes.map(pass => {
+        // Определяем тип гостя
+        const fullName = pass.name.toLowerCase();
+        let royalSymbol = '';
+        let guestType = '';
+        
+        if (fullName.includes('панаморенко')) {
+          royalSymbol = pass.gender === 'male' ? '👑' : '👑';
+          guestType = ' (Королевский)';
+        } else if (fullName.includes('вешкина') && pass.gender === 'female') {
+          royalSymbol = '👸';
+          guestType = ' (Принцесса)';
+        } else if (fullName.includes('бурец') && pass.gender === 'male') {
+          royalSymbol = '🤴';
+          guestType = ' (Принц)';
+        }
+        
+        return `
+          <div class="pass-item">
+            <div class="pass-info">
+              <strong>${royalSymbol} ${pass.name}</strong> ${guestType} (${pass.gender === 'male' ? 'М' : 'Ж'})<br>
+              Стол: ${pass.table}, Место: ${pass.seat}, №: ${pass.passNumber}
+            </div>
+            <div class="pass-actions">
+              <button class="view-btn" onclick="viewPass('${pass.name}', '${pass.gender}', '${pass.table}', '${pass.seat}', '${pass.passNumber}')">Открыть</button>
+              <button class="share-btn" onclick="sharePass('${pass.name}', '${pass.gender}', '${pass.table}', '${pass.seat}', '${pass.passNumber}')">Поделиться</button>
+              <button class="copy-btn" onclick="copyPassInvitation('${pass.name}', '${pass.gender}', '${pass.table}', '${pass.seat}', '${pass.passNumber}')">Копировать</button>
+              <button class="delete-btn" onclick="deletePass('${pass.name}')">Удалить</button>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     // Группировка по столам
@@ -665,12 +613,13 @@
         // Генерируем номер пропуска
         const passNumber = generatePassNumber(name, gender, table, seat);
         
-        // Сохраняем пропуск в базе данных
+        // Сохраняем пропуск
         savePass(name, gender, table, seat);
 
-        // 🔗 Формируем URL для просмотра пропуска
+        // 🔗 Используем абсолютный путь к ticket.html для обеспечения работы на мобильных устройствах
+        const baseUrl = window.location.href.replace('index.html', '');
         const ticketFileName = getTicketFileName(name, gender);
-        const ticketUrl = `${ticketFileName}?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${encodeURIComponent(passNumber)}`;
+        const ticketUrl = `${baseUrl}${ticketFileName}?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${encodeURIComponent(passNumber)}`;
         console.log("Сформированный URL:", ticketUrl);
 
         document.getElementById("result-name").textContent = name;
