@@ -186,12 +186,7 @@
       
       // Обновляем мета-теги Open Graph
       document.querySelector('meta[property="og:title"]').setAttribute('content', `🏴‍☠️ Пиратский Пропуск для ${name}`);
-      document.querySelector('meta[property="og:description"]').setAttribute('content', `🏴‍☠️ Добро пожаловать на борт, ${name.split(' ')[0] || name}!\n\nВот ваш персональный пиратский пропуск:\n\n⚓ Ждём вас 19 сентября!`);
-      document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
-      
-      // Обновляем мета-теги Open Graph
-      document.querySelector('meta[property="og:title"]').setAttribute('content', `🏴‍☠️ Пиратский Пропуск для ${name}`);
-      document.querySelector('meta[property="og:description"]').setAttribute('content', `🏴‍☠️ Добро пожаловать на борт, ${name.split(' ')[0] || name}!\n\nВот ваш персональный пиратский пропуск:\n\n⚓ Ждём вас 19 сентября!`);
+      document.querySelector('meta[property="og:description"]').setAttribute('content', `🏴‍☠️ Добро пожаловать на борт, ${name}!\n\nВот ваш персональный пиратский пропуск №${passNumber}.\n\nВаше место: стол №${table}, место №${seat}\n\n⚓ Ждём вас 19 сентября!`);
       document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
     }
   </script>
