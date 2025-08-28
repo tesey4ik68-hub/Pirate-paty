@@ -313,9 +313,8 @@
         return guestInfo.number;
       } else {
         // Для обычных гостей: №стола + номер места + " - " + первая буква имени (заглавная всегда)
-        // Изменяем формат, чтобы избежать проблем с символами в URL
         const firstLetter = name.charAt(0).toUpperCase();
-        return `${table}${seat}-${firstLetter}`;
+        return `${table}${seat} - ${firstLetter}`;
       }
     }
 
@@ -362,9 +361,8 @@
 
     // Функция поделиться
     function sharePass(name, gender, table, seat, passNumber) {
-      const baseUrl = window.location.href.replace('index.html', '');
-      const ticketFileName = getTicketFileName(name, gender);
-      const ticketUrl = `${baseUrl}${ticketFileName}?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
+      const ticketUrl = window.location.href.replace('index.html', '') + 
+        getTicketFileName(name, gender) + `?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
       
       // Определяем тип гостя для персонализации сообщения
       const fullName = name.toLowerCase();
@@ -542,10 +540,8 @@
         // Сохраняем пропуск
         savePass(name, gender, table, seat);
 
-        // 🔗 Используем абсолютный путь к ticket.html для обеспечения работы на мобильных устройствах
-        const baseUrl = window.location.href.replace('index.html', '');
-        const ticketFileName = gender === 'female' ? 'ticket_female.html' : 'ticket.html';
-        const ticketUrl = `${baseUrl}${ticketFileName}?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
+        // 🔗 Используем относительный путь к ticket.html
+        const ticketUrl = `ticket.html?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
         console.log("Сформированный URL:", ticketUrl);
 
         document.getElementById("result-name").textContent = name;
@@ -571,9 +567,8 @@
 
     // Функция копирования приглашения из списка пропусков
     function copyPassInvitation(name, gender, table, seat, passNumber) {
-      const baseUrl = window.location.href.replace('index.html', '');
-      const ticketFileName = getTicketFileName(name, gender);
-      const ticketUrl = `${baseUrl}${ticketFileName}?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
+      const ticketUrl = window.location.href.replace('index.html', '') + 
+        getTicketFileName(name, gender) + `?name=${encodeURIComponent(name)}&gender=${gender}&table=${table}&seat=${seat}&passNumber=${passNumber}`;
       
       // Определяем тип гостя для персонализации сообщения
       const fullName = name.toLowerCase();
@@ -600,20 +595,14 @@
 
     // Функция копирования приглашения
     function copyInvitation() {
-      initPassStorage();
-      const passes = JSON.parse(localStorage.getItem('piratePasses'));
-      
       const name = document.getElementById("result-name").textContent;
-      const pass = passes.find(p => p.name === name);
+      const gender = document.getElementById("result-gender").textContent;
+      const table = document.getElementById("result-table").textContent;
+      const seat = document.getElementById("result-seat").textContent;
+      const ticketLink = document.querySelector("#ticket-link a").href;
       
-      if (!pass) {
-        alert("Не найден пропуск для копирования!");
-        return;
-      }
-      
-      const { gender, table, seat, passNumber } = pass;
-      
-      // Определяем тип гостя для персонализации сообщения
+      // Генерируем номер пропуска
+      const passNumber = generatePassNumber(name, gender === 'Мужской' ? 'male' : 'female', table, seat);
       
       // Определяем тип гостя для персонализации сообщения
       const fullName = name.toLowerCase();
@@ -633,17 +622,30 @@
       copyToClipboard(shareText);
     }
     
-    // Упрощенная функция копирования текста в буфер обмена
-    function copyToClipboard(text) {
+    // Обновленная функция копирования текста в буфер обмена с поддержкой HTML
+    function copyToClipboard(text, html = null) {
       // Проверяем, поддерживается ли современный API буфера обмена
-      if (navigator.clipboard) {
-        // Копируем как обычный текст
-        navigator.clipboard.writeText(text).then(() => {
-          alert("Текст скопирован в буфер обмена!");
-        }).catch(err => {
-          console.error('Ошибка копирования в буфер обмена: ', err);
-          fallbackCopyText(text);
-        });
+      if (navigator.clipboard && window.ClipboardItem) {
+        if (html) {
+          // Копируем как HTML и как обычный текст
+          const textPlain = new ClipboardItem({ 'text/plain': new Blob([text], { type: 'text/plain' }) });
+          const textHtml = new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }) });
+          
+          navigator.clipboard.write([textHtml, textPlain]).then(() => {
+            alert("Ссылка и текст скопированы в буфер обмена!");
+          }).catch(err => {
+            console.error('Ошибка копирования в буфер обмена: ', err);
+            fallbackCopyText(text);
+          });
+        } else {
+          // Если нет HTML, копируем как обычный текст
+          navigator.clipboard.writeText(text).then(() => {
+            alert("Текст скопирован в буфер обмена!");
+          }).catch(err => {
+            console.error('Ошибка копирования в буфер обмена: ', err);
+            fallbackCopyText(text);
+          });
+        }
       } else {
         // Резервный метод для старых браузеров
         fallbackCopyText(text);
