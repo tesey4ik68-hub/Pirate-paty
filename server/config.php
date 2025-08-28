@@ -8,7 +8,7 @@
 // $username = ' имя_пользователя_базы_данных';
 // $password = ' пароль_пользователя_базы_данных';
 
-$host = 'server282.hosting.reg.ru';
+$host = 'https://server282.hosting.reg.ru:1500/';
 $dbname = 'u3243360_default'; // Замените на имя вашей базы данных
 $username = 'u3243360_tesey4ik'; // Замените на имя пользователя базы данных
 $password = 'Papa1211!Papa1211!'; // Замените на пароль к базе данных
